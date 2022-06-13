@@ -1,6 +1,6 @@
 {
   "name": "consolechain",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "consolechain CLI",
   "bin": {
     "consolechain": "bin/consolechain"
@@ -18,6 +18,15 @@
     "readme.md",
     "docs",
     "bin"
+  ],
+  "keywords": [
+    "ethereum",
+    "chain",
+    "blockchain",
+    "smart-contrat",
+    "terminal",
+    "console",
+    "cli"
   ],
   "repository": {
     "type": "git",
