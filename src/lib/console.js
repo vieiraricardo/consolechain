@@ -26,7 +26,7 @@ async function main(toolbox) {
     const readline = createInterface({
       input,
       output,
-      prompt: chalk.gray.bold('⧫ '),
+      prompt: chalk.gray.bold('Ξ '),
       completer,
     })
 
