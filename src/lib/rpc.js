@@ -1,8 +1,8 @@
 module.exports = {
   ethereum: 'https://mainnet.infura.io/v3',
   rinkeby: 'https://rinkeby.infura.io/v3',
-  polygon: 'https://polygon-rpc.com',
-  mumbai: 'https://nd-255-652-282.p2pify.com/b18cba7708d3eefb3b785758b4c2fba1',
+  polygon: 'https://rpc-mainnet.maticvigil.com',
+  mumbai: 'https://rpc-mumbai.maticvigil.com	',
   syscoin: 'https://rpc.syscoin.org',
   explorer: {
     ethereum: 'https://etherscan.io',
