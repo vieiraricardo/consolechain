@@ -1,7 +1,7 @@
 module.exports = {
   ethereum: 'https://mainnet.infura.io/v3',
   rinkeby: 'https://rinkeby.infura.io/v3',
-  polygon: 'https://rpc-mainnet.maticvigil.com',
+  polygon: 'https://polygon-rpc.com',
   mumbai: 'https://rpc-mumbai.maticvigil.com	',
   syscoin: 'https://rpc.syscoin.org',
   explorer: {
