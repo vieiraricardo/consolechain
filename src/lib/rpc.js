@@ -4,11 +4,13 @@ module.exports = {
   polygon: 'https://polygon-rpc.com',
   mumbai: 'https://rpc-mumbai.maticvigil.com	',
   syscoin: 'https://rpc.syscoin.org',
+  bedrock: 'https://rpc-tanenbaum.rollux.com/',
   explorer: {
     ethereum: 'https://etherscan.io',
     goerli: 'https://goerli.etherscan.io',
     polygon: 'https://polygonscan.com',
     mumbai: 'https://mumbai.polygonscan.com',
     syscoin: 'https://explorer.syscoin.org',
+    bedrock: 'https://rollux.tanenbaum.io',
   },
 }
