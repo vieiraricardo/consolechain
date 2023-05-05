@@ -8,6 +8,6 @@ module.exports = (abiPath) => {
   if (!abi) {
     throw new Error('no such file or directory')
   } else {
-    return abi
+    return abi?.abi || abi
   }
 }
