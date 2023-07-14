@@ -1,6 +1,6 @@
 {
   "name": "consolechain",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "consolechain CLI",
   "bin": {
     "consolechain": "bin/consolechain"

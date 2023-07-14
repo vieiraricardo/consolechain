@@ -5,6 +5,7 @@ module.exports = {
   mumbai: 'https://rpc-mumbai.maticvigil.com	',
   syscoin: 'https://rpc.syscoin.org',
   bedrock: 'https://rpc-tanenbaum.rollux.com/',
+  rollux: 'https://rpc.rollux.com',
   explorer: {
     ethereum: 'https://etherscan.io',
     goerli: 'https://goerli.etherscan.io',
@@ -12,5 +13,6 @@ module.exports = {
     mumbai: 'https://mumbai.polygonscan.com',
     syscoin: 'https://explorer.syscoin.org',
     bedrock: 'https://rollux.tanenbaum.io',
+    rollux: 'https://explorer.rollux.com',
   },
 }
