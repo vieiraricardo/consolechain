@@ -4,7 +4,7 @@ module.exports = {
   polygon: 'https://polygon-rpc.com',
   mumbai: 'https://rpc-mumbai.maticvigil.com	',
   syscoin: 'https://rpc.syscoin.org',
-  bedrock: 'https://rpc-tanenbaum.rollux.com/',
+  bedrock: 'https://rpc-tanenbaum.rollux.com',
   rollux: 'https://rpc.rollux.com',
   explorer: {
     ethereum: 'https://etherscan.io',

@@ -50,7 +50,10 @@ async function main(toolbox) {
 
     readline.on('line', async (input) => {
       try {
-        const [method, ...params] = input.split(' ').filter(Boolean)
+        const [method, ...params] = input
+          .match(/'([^']*)'|\S+/g)
+          .filter(Boolean)
+          .map((s) => s.replace(/'/g, ''))
 
         if (!method) {
           readline.write(null, { ctrl: true, name: 'u' })
