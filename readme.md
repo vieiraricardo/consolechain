@@ -1,45 +1,45 @@
-# consolechain
+# ConsoleChain
 
-A CLI to interact with smart contracts.
+ConsoleChain is a command-line interface (CLI) tool designed for seamless interaction with smart contracts on various blockchain networks.
 
-![](/screenshot-1.png)
+![ConsoleChain Screenshot](/screenshot-1.png)
 
-## Instalation
+## Installation
 
-```shell
+Install ConsoleChain globally using npm:
+
+```bash
 npm install -g consolechain
 ```
 
-## How to use
+## How to Use
 
-Just call the CLI by passing the contract address, the chain name and a path to the contract's abi file.
+To utilize ConsoleChain, simply invoke the CLI by providing the contract address, the chain name, and the path to the contract's ABI file.
 
-```shell
+```bash
 consolechain 0xB5AD8162a7E6DFBc1d12aF9A494779376B44ed1b --chain syscoin --abi /abi-path/abi.json
 ```
 
-To interact with ERC-721, ERC-1155 and ERC-20 type contracts add the standard argument with one of the following values `721`, `1155` or `20`. This will load a generic abi with predefined methods for the chosen standard.
+For ERC-721, ERC-1155, and ERC-20 type contracts, use the `--standard` argument with values `721`, `1155`, or `20`. This loads a generic ABI with predefined methods for the selected standard.
 
-```shell
+```bash
 consolechain 0xB5AD8162a7E6DFBc1d12aF9A494779376B44ed1b --chain syscoin --standard 721
 ```
 
-To execute methods that need a connected address, you need to add a private key to the CLI, it will store the key in a file called `consolechain.json` in the `.config/` folder in your operating system's home folder.
+To execute methods requiring a connected address, add a private key to the CLI. The key is stored in a file named `consolechain.json` within the `.config/` folder in your operating system's home directory.
 
-```shell
+```bash
 consolechain set-pk your-private-key
 ```
 
-The cli has autocomplete so you just need to press tab key to complete a function name or press tab 2x to see all contract abi methods.
+The CLI features autocompletion; press the tab key to complete a function name or tab twice to view all contract ABI methods. To discover the parameters for function calls, type the function name with the `-h` argument.
 
-To know which parameters to pass to the function calls type the function name with the -h argument.
+![ConsoleChain Autocomplete](/screenshot-2.png)
 
-![](/screenshot-2.png)
+Finally, to execute a function, type the function name followed by the arguments separated by space.
 
-finally, to execute a function type the name of the function followed by the arguments separated by space
+![ConsoleChain Function Execution](/screenshot-3.png)
 
-![](/screenshot-3.png)
+## License
 
-# License
-
-MIT - see LICENSE
+MIT - See [LICENSE](LICENSE)
