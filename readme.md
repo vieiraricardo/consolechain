@@ -42,4 +42,4 @@ Finally, to execute a function, type the function name followed by the arguments
 
 ## License
 
-MIT - See [LICENSE](LICENSE)
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
