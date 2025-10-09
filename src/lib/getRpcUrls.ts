@@ -1,4 +1,4 @@
-import { ChainlistChain, ChainlistRpc } from '../types'
+import { ChainlistChain } from '../types'
 
 /**
  * Gets all available HTTP RPC URLs from a chain
@@ -7,7 +7,7 @@ import { ChainlistChain, ChainlistRpc } from '../types'
 export function getAllRpcUrls(chain: ChainlistChain): string[] {
   if (!chain || !chain.rpc || chain.rpc.length === 0) {
     throw new Error(
-      `No RPC endpoints available for ${chain?.name || 'unknown chain'}`
+      `No RPC endpoints available for ${chain?.name || 'unknown chain'}`,
     )
   }
 

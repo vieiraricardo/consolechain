@@ -81,7 +81,7 @@ export CONSOLECHAIN_ENCRYPTION_KEY=$(openssl rand -hex 32)
 consolechain set-pk your-private-key
 ```
 
-## 🎮 Interactive Console
+## Interactive Console
 
 Once connected, you have access to several features:
 

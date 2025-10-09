@@ -13,7 +13,7 @@ export function parseParams(params: string[]): any[] {
     if (/^\[.*\]$/.test(value)) {
       try {
         return JSON.parse(value)
-      } catch (error) {
+      } catch {
         throw new Error(`Invalid array format: ${value}`)
       }
     }
