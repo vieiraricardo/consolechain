@@ -1,29 +1,31 @@
 {
   "name": "consolechain",
-  "version": "0.1.8",
+  "version": "0.2.0",
   "description": "consolechain CLI",
   "bin": {
-    "consolechain": "bin/consolechain"
+    "consolechain": "build/cli.js"
   },
   "scripts": {
-    "format": "eslint \"**/*.{js,jsx}\" --fix && prettier \"**/*.{js,jsx,json}\" --write",
+    "build": "tsc",
+    "dev": "ts-node src/cli.ts",
+    "prepublishOnly": "npm run build",
+    "format": "eslint \"src/**/*.{ts,tsx}\" --fix && prettier \"src/**/*.{ts,tsx,json}\" --write",
     "test": "jest",
     "watch": "jest --watch",
     "snapupdate": "jest --updateSnapshot",
     "coverage": "jest --coverage"
   },
   "files": [
-    "src",
+    "build",
     "LICENSE",
     "readme.md",
-    "docs",
-    "bin"
+    "docs"
   ],
   "keywords": [
     "ethereum",
     "chain",
     "blockchain",
-    "smart-contrat",
+    "smart-contract",
     "terminal",
     "console",
     "cli"
@@ -34,30 +36,30 @@
   },
   "license": "MIT",
   "dependencies": {
-    "chalk": "4.1.2",
-    "ethers": "^5.6.8",
-    "gluegun": "latest"
+    "chalk": "^5.3.0",
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.4",
+    "gluegun": "^5.2.0"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.7.9",
+    "@typescript-eslint/eslint-plugin": "^8.11.0",
+    "@typescript-eslint/parser": "^8.11.0",
     "copyfiles": "^2.4.1",
-    "eslint": "^7.22.0",
-    "eslint-config-prettier": "^8.1.0",
-    "eslint-plugin-prettier": "^3.3.1",
-    "husky": "^5.1.3",
-    "jest": "^26.6.3",
-    "prettier": "^2.2.1",
-    "pretty-quick": "^3.1.0"
-  },
-  "jest": {
-    "testEnvironment": "node"
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "husky": "^9.1.6",
+    "jest": "^29.7.0",
+    "prettier": "^3.3.3",
+    "pretty-quick": "^4.0.0",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
   },
   "prettier": {
     "semi": false,
     "singleQuote": true
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick --staged"
-    }
   }
 }
