@@ -1,6 +1,6 @@
 import { stdin as input, stdout as output } from 'process'
 import { createInterface } from 'readline'
-import { isAddress } from 'ethers'
+import { isAddress, FunctionFragment } from 'ethers'
 import chalk from 'chalk'
 import { ConsoleChainToolbox, ConsoleOptions } from '../types'
 import { getContract } from './getContract'
@@ -34,8 +34,8 @@ export async function consoleMain(toolbox: ConsoleChainToolbox): Promise<void> {
       console.log(
         chalk.red('Error: Invalid Ethereum address provided\n') +
           chalk.gray(
-            'Usage: consolechain <address> [--chain <chain> | --rpc <url> | --interactive] [--abi <path> | --standard <20|721|1155>]'
-          )
+            'Usage: consolechain <address> [--chain <chain> | --rpc <url> | --interactive] [--abi <path> | --standard <20|721|1155>]',
+          ),
       )
       return
     }
@@ -78,8 +78,8 @@ export async function consoleMain(toolbox: ConsoleChainToolbox): Promise<void> {
       console.log(
         chalk.red('Error: You must specify either --abi or --standard\n') +
           chalk.gray(
-            'Example: consolechain 0x... --chain ethereum --standard 721'
-          )
+            'Example: consolechain 0x... --chain ethereum --standard 721',
+          ),
       )
       return
     }
@@ -115,8 +115,8 @@ export async function consoleMain(toolbox: ConsoleChainToolbox): Promise<void> {
     }
     console.log(
       chalk.gray(
-        `Type 'help' for available commands, or use <TAB> for autocomplete\n`
-      )
+        `Type 'help' for available commands, or use <TAB> for autocomplete\n`,
+      ),
     )
 
     readline.prompt()
@@ -154,7 +154,7 @@ export async function consoleMain(toolbox: ConsoleChainToolbox): Promise<void> {
           console.log(chalk.gray('  clear         - Clear the screen'))
           console.log(chalk.gray('  <method> -h   - Show method signature'))
           console.log(
-            chalk.gray('  <method> [...args] - Call contract method\n')
+            chalk.gray('  <method> [...args] - Call contract method\n'),
           )
           console.log(chalk.cyan('Contract methods:'))
           completions
@@ -178,16 +178,26 @@ export async function consoleMain(toolbox: ConsoleChainToolbox): Promise<void> {
 
         // Show method help
         if (params[0] === '-h' || params[0] === '--help') {
-          const fragment = contract.interface.fragments.find(
-            (f) => f.type === 'function' && (f as any).name === method
+          const matchingFragments = contract.interface.fragments.filter(
+            (f) => f.type === 'function' && (f as any).name === method,
           )
 
-          if (fragment && fragment.type === 'function') {
-            console.log(
-              chalk.greenBright.bold(
-                '\n' + parseAbiFunctionParams(method, fragment.inputs) + '\n'
-              )
-            )
+          if (matchingFragments.length > 0) {
+            console.log()
+            matchingFragments.forEach((fragment) => {
+              if (fragment.type === 'function') {
+                console.log(
+                  chalk.greenBright.bold(
+                    '  ' +
+                      parseAbiFunctionParams(
+                        (fragment as any).name,
+                        fragment.inputs,
+                      ),
+                  ),
+                )
+              }
+            })
+            console.log()
           } else {
             console.log(chalk.red(`Method ${method} not found\n`))
           }
@@ -197,17 +207,98 @@ export async function consoleMain(toolbox: ConsoleChainToolbox): Promise<void> {
 
         // Call contract method
         const parsedParams = parseParams(params)
-        const response = await contract[method](...parsedParams)
+
+        // Handle function overloads by finding the correct signature
+        const allFragments = contract.interface.fragments.filter(
+          (f) => f.type === 'function' && (f as any).name === method,
+        )
+
+        let response
+
+        if (allFragments.length === 1) {
+          // Single match - call directly
+          response = await contract[method](...parsedParams)
+        } else if (allFragments.length > 1) {
+          // Multiple overloads - find by parameter count
+          const matchingFragment = allFragments.find(
+            (f) =>
+              f.type === 'function' && f.inputs.length === parsedParams.length,
+          )
+
+          if (matchingFragment && matchingFragment.type === 'function') {
+            // Cast to FunctionFragment to access function-specific properties
+            const funcFragment = matchingFragment as FunctionFragment
+
+            // Use fragment directly to avoid ambiguity
+            const data = contract.interface.encodeFunctionData(
+              funcFragment,
+              parsedParams,
+            )
+
+            // Check if it's a view/pure function or a transaction
+            if (
+              funcFragment.stateMutability === 'view' ||
+              funcFragment.stateMutability === 'pure'
+            ) {
+              const contractAddress = await contract.getAddress()
+              const provider = contract.runner?.provider
+              if (!provider) {
+                throw new Error('No provider available')
+              }
+              const result = await provider.call({
+                to: contractAddress,
+                data: data,
+              })
+              response = contract.interface.decodeFunctionResult(
+                funcFragment,
+                result,
+              )[0]
+            } else {
+              const contractAddress = await contract.getAddress()
+              if (
+                !contract.runner ||
+                typeof (contract.runner as any).sendTransaction !== 'function'
+              ) {
+                throw new Error(
+                  'No signer available for sending transactions.\n' +
+                    'Please set your private key using: consolechain setPrivateKey',
+                )
+              }
+
+              console.log(
+                chalk.gray(`  Sending transaction to ${contractAddress}...`),
+              )
+
+              response = await (contract.runner as any).sendTransaction({
+                to: contractAddress,
+                data: data,
+              })
+            }
+          } else {
+            const signatures = allFragments
+              .map((f) => f.format('full'))
+              .join('\n  ')
+            throw new Error(
+              `No ${method} signature matches ${parsedParams.length} parameter(s).\n` +
+                `Available signatures:\n  ${signatures}`,
+            )
+          }
+        } else {
+          // No match - try directly (will throw helpful error)
+          response = await contract[method](...parsedParams)
+        }
 
         // Format response
         if (response?.hash) {
           console.log(
             chalk.cyan('\n  Transaction sent:'),
-            chalk.blueBright.bold(`${explorer}/tx/${response.hash}\n`)
+            chalk.blueBright.bold(`${explorer}/tx/${response.hash}\n`),
           )
         } else if (typeof response === 'object' && response !== null) {
           console.log(
-            chalk.whiteBright('\n  ' + JSON.stringify(response, null, 2) + '\n')
+            chalk.whiteBright(
+              '\n  ' + JSON.stringify(response, null, 2) + '\n',
+            ),
           )
         } else {
           console.log(chalk.whiteBright('\n  ' + response?.toString() + '\n'))
@@ -215,8 +306,31 @@ export async function consoleMain(toolbox: ConsoleChainToolbox): Promise<void> {
 
         readline.prompt()
       } catch (error: any) {
-        const errorMessage =
+        let errorMessage =
           error?.error?.reason || error?.reason || error.message
+
+        // Add helpful context for common errors
+        if (
+          error.code === 'UNKNOWN_ERROR' &&
+          errorMessage.includes('Unable to perform request')
+        ) {
+          errorMessage =
+            'Transaction failed: Unable to send transaction.\n' +
+            '  Possible causes:\n' +
+            '  - Insufficient funds for gas\n' +
+            '  - RPC endpoint issue\n' +
+            '  - Invalid transaction parameters\n' +
+            '  Original error: ' +
+            error.message
+        } else if (error.code === 'INSUFFICIENT_FUNDS') {
+          errorMessage = 'Insufficient funds to pay for gas fees'
+        } else if (
+          error.code === 'NONCE_EXPIRED' ||
+          error.code === 'REPLACEMENT_UNDERPRICED'
+        ) {
+          errorMessage = 'Transaction nonce issue: ' + errorMessage
+        }
+
         console.log(chalk.redBright(`\n  Error: ${errorMessage}\n`))
         readline.prompt()
       }
