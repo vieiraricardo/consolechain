@@ -10,7 +10,9 @@ import { tmpdir } from 'os'
 import { resolve } from 'path'
 import { readFileSync, writeFileSync, mkdirSync } from 'fs'
 
-const tmpCache = () => resolve(tmpdir(), `cc-update-${process.pid}-${Date.now()}.json`)
+let tmpCounter = 0
+const tmpCache = () =>
+  resolve(tmpdir(), `cc-update-${process.pid}-${Date.now()}-${tmpCounter++}.json`)
 
 describe('semverGreaterThan', () => {
   it('returns true when first arg is newer', () => {
@@ -124,4 +126,81 @@ describe('fetchLatestVersion', () => {
       })
     expect(await fetchLatestVersion('https://x', 20, fetchImpl)).toBeNull()
   }, 2000)
+})
+
+import { checkForUpdate } from '../src/lib/updateChecker'
+
+describe('checkForUpdate', () => {
+  it('notifies and writes cache when a newer version is published', async () => {
+    const path = tmpCache()
+    const logs: string[] = []
+    await checkForUpdate({
+      currentVersion: '0.2.2',
+      registryUrl: 'https://x',
+      cachePath: path,
+      intervalMs: 100000,
+      timeoutMs: 1000,
+      fetchImpl: async () => ok({ version: '0.2.3' }) as any,
+      now: () => 5000,
+      log: (m: string) => logs.push(m),
+    })
+    expect(logs).toHaveLength(1)
+    expect(logs[0]).toBe(
+      'Update available 0.2.2 → 0.2.3 — run "npm i -g consolechain" to update',
+    )
+    expect(readCache(path)).toEqual({ lastCheck: 5000, latestVersion: '0.2.3' })
+  })
+
+  it('does not notify when the published version is not newer', async () => {
+    const logs: string[] = []
+    await checkForUpdate({
+      currentVersion: '0.2.2',
+      cachePath: tmpCache(),
+      intervalMs: 100000,
+      timeoutMs: 1000,
+      fetchImpl: async () => ok({ version: '0.2.2' }) as any,
+      now: () => 5000,
+      log: (m: string) => logs.push(m),
+    })
+    expect(logs).toHaveLength(0)
+  })
+
+  it('stays silent and skips cache write when fetch fails', async () => {
+    const path = tmpCache()
+    const logs: string[] = []
+    await checkForUpdate({
+      currentVersion: '0.2.2',
+      cachePath: path,
+      intervalMs: 100000,
+      timeoutMs: 1000,
+      fetchImpl: async () => {
+        throw new Error('down')
+      },
+      now: () => 5000,
+      log: (m: string) => logs.push(m),
+    })
+    expect(logs).toHaveLength(0)
+    expect(readCache(path)).toBeNull()
+  })
+
+  it('reuses a fresh cache and does not call fetch', async () => {
+    const path = tmpCache()
+    writeCache(path, { lastCheck: 4999, latestVersion: '0.2.3' })
+    let called = 0
+    const logs: string[] = []
+    await checkForUpdate({
+      currentVersion: '0.2.2',
+      cachePath: path,
+      intervalMs: 100000, // 5000 - 4999 = 1 < 100000 => fresh
+      timeoutMs: 1000,
+      fetchImpl: async () => {
+        called++
+        return ok({ version: '9.9.9' }) as any
+      },
+      now: () => 5000,
+      log: (m: string) => logs.push(m),
+    })
+    expect(called).toBe(0)
+    expect(logs).toHaveLength(1) // still notifies from cached 0.2.3 > 0.2.2
+  })
 })

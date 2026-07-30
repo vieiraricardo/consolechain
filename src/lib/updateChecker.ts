@@ -26,7 +26,9 @@ const TIMEOUT_MS = 1500
 
 function getCurrentVersion(): string {
   try {
-    const pkg = JSON.parse(readFileSync(resolve(__dirname, '../../package.json'), 'utf8'))
+    const pkg = JSON.parse(
+      readFileSync(resolve(__dirname, '../../package.json'), 'utf8'),
+    )
     return pkg.version
   } catch {
     return '0.0.0'
@@ -37,7 +39,8 @@ export function semverGreaterThan(a: string, b: string): boolean {
   const pa = a.split('.').map((n) => Number(n))
   const pb = b.split('.').map((n) => Number(n))
   if (pa.length !== 3 || pb.length !== 3) return false
-  if (pa.some((n) => Number.isNaN(n)) || pb.some((n) => Number.isNaN(n))) return false
+  if (pa.some((n) => Number.isNaN(n)) || pb.some((n) => Number.isNaN(n)))
+    return false
   for (let i = 0; i < 3; i++) {
     if (pa[i] > pb[i]) return true
     if (pa[i] < pb[i]) return false
@@ -45,7 +48,10 @@ export function semverGreaterThan(a: string, b: string): boolean {
   return false
 }
 
-export function isUpdateAvailable(current: string, latest: string | null): boolean {
+export function isUpdateAvailable(
+  current: string,
+  latest: string | null,
+): boolean {
   return latest !== null && semverGreaterThan(latest, current)
 }
 
@@ -109,4 +115,37 @@ export const DEFAULTS = {
   intervalMs: INTERVAL_MS,
   timeoutMs: TIMEOUT_MS,
   pkgName: 'consolechain',
+}
+
+export async function checkForUpdate(
+  opts: Partial<CheckOptions> = {},
+): Promise<void> {
+  try {
+    const pkgName = opts.pkgName ?? DEFAULTS.pkgName
+    const registryUrl = opts.registryUrl ?? DEFAULTS.registryUrl
+    const cachePath = opts.cachePath ?? DEFAULTS.cachePath
+    const intervalMs = opts.intervalMs ?? DEFAULTS.intervalMs
+    const timeoutMs = opts.timeoutMs ?? DEFAULTS.timeoutMs
+    const fetchImpl = opts.fetchImpl ?? fetch
+    const now = opts.now ?? (() => Date.now())
+    const log = opts.log ?? ((msg: string) => console.error(msg))
+    const currentVersionStr = opts.currentVersion ?? getCurrentVersion()
+
+    let latest: string | null = null
+    const cache = readCache(cachePath)
+    if (isCacheFresh(cache, now(), intervalMs)) {
+      latest = cache!.latestVersion
+    } else {
+      latest = await fetchLatestVersion(registryUrl, timeoutMs, fetchImpl)
+      if (latest !== null) {
+        writeCache(cachePath, { lastCheck: now(), latestVersion: latest })
+      }
+    }
+
+    if (isUpdateAvailable(currentVersionStr, latest)) {
+      log(formatUpdateNotice(currentVersionStr, latest!, pkgName))
+    }
+  } catch {
+    // Never let the update check affect the CLI.
+  }
 }
