@@ -1,5 +1,10 @@
 # ConsoleChain
 
+[![npm version](https://img.shields.io/npm/v/consolechain)](https://www.npmjs.com/package/consolechain)
+[![npm downloads](https://img.shields.io/npm/dm/consolechain)](https://www.npmjs.com/package/consolechain)
+![License](https://img.shields.io/github/license/vieiraricardo/consolechain)
+![TypeScript](https://img.shields.io/badge/language-TypeScript-blue)
+
 ConsoleChain is a powerful command-line interface (CLI) tool for seamless interaction with smart contracts on various blockchain networks. Built with TypeScript for enhanced type safety and developer experience.
 
 ![ConsoleChain Screenshot](/consolechain.png)
