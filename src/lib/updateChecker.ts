@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'fs'
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs'
 import { homedir } from 'os'
 import { resolve } from 'path'
 
@@ -63,6 +63,25 @@ export function formatUpdateNotice(
   pkgName: string,
 ): string {
   return `Update available ${current} → ${latest} — run "npm i -g ${pkgName}" to update`
+}
+
+export function readCache(cachePath: string): CachedUpdate | null {
+  if (!existsSync(cachePath)) return null
+  try {
+    return JSON.parse(readFileSync(cachePath, 'utf8')) as CachedUpdate
+  } catch {
+    return null
+  }
+}
+
+export function writeCache(cachePath: string, cache: CachedUpdate): void {
+  try {
+    const dir = resolve(cachePath, '..')
+    if (!existsSync(dir)) mkdirSync(dir, { recursive: true })
+    writeFileSync(cachePath, JSON.stringify(cache), 'utf8')
+  } catch {
+    // Best-effort; never let cache writes affect the CLI.
+  }
 }
 
 export const DEFAULTS = {

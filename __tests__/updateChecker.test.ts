@@ -3,7 +3,14 @@ import {
   isUpdateAvailable,
   isCacheFresh,
   formatUpdateNotice,
+  readCache,
+  writeCache,
 } from '../src/lib/updateChecker'
+import { tmpdir } from 'os'
+import { resolve } from 'path'
+import { readFileSync, writeFileSync, mkdirSync } from 'fs'
+
+const tmpCache = () => resolve(tmpdir(), `cc-update-${process.pid}-${Date.now()}.json`)
 
 describe('semverGreaterThan', () => {
   it('returns true when first arg is newer', () => {
@@ -54,5 +61,28 @@ describe('formatUpdateNotice', () => {
     expect(formatUpdateNotice('0.2.2', '0.2.3', 'consolechain')).toBe(
       'Update available 0.2.2 → 0.2.3 — run "npm i -g consolechain" to update',
     )
+  })
+})
+
+describe('readCache / writeCache', () => {
+  it('returns null when the cache file does not exist', () => {
+    expect(readCache(tmpCache())).toBeNull()
+  })
+
+  it('returns null when the cache file is corrupt', () => {
+    const path = tmpCache()
+    writeFileSync(path, '{ not json', 'utf8')
+    expect(readCache(path)).toBeNull()
+  })
+
+  it('round-trips a written cache', () => {
+    const path = tmpCache()
+    writeCache(path, { lastCheck: 123, latestVersion: '0.2.3' })
+    expect(readCache(path)).toEqual({ lastCheck: 123, latestVersion: '0.2.3' })
+  })
+
+  it('writeCache does not throw when the directory is missing', () => {
+    const path = resolve(tmpdir(), `no-such-dir-${process.pid}-${Date.now()}`, 'cache.json')
+    expect(() => writeCache(path, { lastCheck: 1, latestVersion: '0.2.3' })).not.toThrow()
   })
 })
