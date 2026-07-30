@@ -86,3 +86,38 @@ describe('readCache / writeCache', () => {
     expect(() => writeCache(path, { lastCheck: 1, latestVersion: '0.2.3' })).not.toThrow()
   })
 })
+
+import { fetchLatestVersion } from '../src/lib/updateChecker'
+
+const ok = (body: unknown) => ({ ok: true, json: async () => body })
+
+describe('fetchLatestVersion', () => {
+  it('returns the version field on a 200 response', async () => {
+    const fetchImpl = async () => ok({ version: '0.2.3' }) as any
+    expect(await fetchLatestVersion('https://x', 1000, fetchImpl)).toBe('0.2.3')
+  })
+
+  it('returns null on a non-200 response', async () => {
+    const fetchImpl = async () => ({ ok: false, status: 500 }) as any
+    expect(await fetchLatestVersion('https://x', 1000, fetchImpl)).toBeNull()
+  })
+
+  it('returns null when the body has no string version', async () => {
+    const fetchImpl = async () => ok({ nope: true }) as any
+    expect(await fetchLatestVersion('https://x', 1000, fetchImpl)).toBeNull()
+  })
+
+  it('returns null when fetch rejects', async () => {
+    const fetchImpl = async () => {
+      throw new Error('network down')
+    }
+    expect(await fetchLatestVersion('https://x', 1000, fetchImpl)).toBeNull()
+  })
+
+  it('returns null when the request times out (abort)', async () => {
+    const fetchImpl = async () => {
+      throw new Error('Aborted')
+    }
+    expect(await fetchLatestVersion('https://x', 10, fetchImpl)).toBeNull()
+  }, 2000)
+})

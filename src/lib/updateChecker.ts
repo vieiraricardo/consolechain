@@ -84,6 +84,25 @@ export function writeCache(cachePath: string, cache: CachedUpdate): void {
   }
 }
 
+export async function fetchLatestVersion(
+  registryUrl: string,
+  timeoutMs: number,
+  fetchImpl: typeof fetch = fetch,
+): Promise<string | null> {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), timeoutMs)
+  try {
+    const response = await fetchImpl(registryUrl, { signal: controller.signal })
+    if (!response.ok) return null
+    const data: any = await response.json()
+    return typeof data.version === 'string' ? data.version : null
+  } catch {
+    return null
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
 export const DEFAULTS = {
   registryUrl: REGISTRY_URL,
   cachePath: CACHE_PATH,
