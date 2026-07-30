@@ -89,14 +89,17 @@ export async function getChains(
  */
 export function searchChains(
   chains: ChainlistChain[],
-  query: string,
+  query: string | number,
 ): ChainlistChain[] {
-  const lowerQuery = query.toLowerCase()
+  // gluegun's parameters.first returns a number at runtime for numeric CLI
+  // args (e.g. `list-chains 137`), so normalize to a string before matching.
+  const normalizedQuery = String(query)
+  const lowerQuery = normalizedQuery.toLowerCase()
 
   return chains.filter((chain) => {
     const nameMatch = chain.name.toLowerCase().includes(lowerQuery)
     const shortNameMatch = chain.shortName.toLowerCase().includes(lowerQuery)
-    const chainIdMatch = chain.chainId.toString() === query
+    const chainIdMatch = chain.chainId.toString() === normalizedQuery
     const slugMatch = chain.chainSlug?.toLowerCase().includes(lowerQuery)
 
     return nameMatch || shortNameMatch || chainIdMatch || slugMatch
