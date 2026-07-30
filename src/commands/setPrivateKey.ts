@@ -12,7 +12,7 @@ const command: GluegunCommand = {
     if (!privateKey) {
       console.log(
         chalk.red('Error: Private key required\n') +
-          chalk.gray('Usage: consolechain set-pk <your-private-key>')
+          chalk.gray('Usage: consolechain set-pk <your-private-key>'),
       )
       return
     }
@@ -22,8 +22,8 @@ const command: GluegunCommand = {
       console.log(
         chalk.red('Error: Invalid private key format\n') +
           chalk.gray(
-            'Private key must be a 64-character hexadecimal string (with or without 0x prefix)'
-          )
+            'Private key must be a 64-character hexadecimal string (with or without 0x prefix)',
+          ),
       )
       return
     }
@@ -39,8 +39,8 @@ const command: GluegunCommand = {
       console.log(chalk.green('\n✓ Private key saved successfully'))
       console.log(
         chalk.gray(
-          'Set CONSOLECHAIN_ENCRYPTION_KEY environment variable to encrypt your key\n'
-        )
+          'Set CONSOLECHAIN_ENCRYPTION_KEY environment variable to encrypt your key\n',
+        ),
       )
     } catch (error: any) {
       console.log(chalk.red(`\nError saving private key: ${error.message}\n`))

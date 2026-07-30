@@ -22,18 +22,32 @@ const command: GluegunCommand = {
         filteredChains = searchChains(chains, searchQuery)
 
         if (filteredChains.length === 0) {
-          print.error(chalk.red(`\n❌ No chains found matching: "${searchQuery}"\n`))
+          print.error(
+            chalk.red(`\n❌ No chains found matching: "${searchQuery}"\n`),
+          )
           return
         }
 
-        print.success(chalk.green(`\n✓ Found ${filteredChains.length} chains matching "${searchQuery}":\n`))
+        print.success(
+          chalk.green(
+            `\n✓ Found ${filteredChains.length} chains matching "${searchQuery}":\n`,
+          ),
+        )
       } else {
-        print.success(chalk.green(`\n✓ Found ${chains.length} blockchain networks\n`))
-        print.info(chalk.gray('Showing popular networks (use search to find more)\n'))
+        print.success(
+          chalk.green(`\n✓ Found ${chains.length} blockchain networks\n`),
+        )
+        print.info(
+          chalk.gray('Showing popular networks (use search to find more)\n'),
+        )
 
         // Show only popular chains by default
-        const popularChainIds = [1, 137, 56, 42161, 10, 8453, 43114, 250, 25, 100]
-        filteredChains = chains.filter(chain => popularChainIds.includes(chain.chainId))
+        const popularChainIds = [
+          1, 137, 56, 42161, 10, 8453, 43114, 250, 25, 100,
+        ]
+        filteredChains = chains.filter((chain) =>
+          popularChainIds.includes(chain.chainId),
+        )
       }
 
       // Display chains
@@ -47,7 +61,11 @@ const command: GluegunCommand = {
       })
 
       if (filteredChains.length > 50) {
-        print.warning(chalk.yellow(`\n⚠️  Showing first 50 of ${filteredChains.length} results\n`))
+        print.warning(
+          chalk.yellow(
+            `\n⚠️  Showing first 50 of ${filteredChains.length} results\n`,
+          ),
+        )
         print.info(chalk.gray('Use a more specific search to narrow results\n'))
       }
 
@@ -55,14 +73,19 @@ const command: GluegunCommand = {
       print.info(chalk.cyan('💡 Usage examples:\n'))
       console.log(chalk.gray('  consolechain list-chains ethereum'))
       console.log(chalk.gray('  consolechain list-chains polygon'))
-      console.log(chalk.gray('  consolechain list-chains 137  # Search by chain ID'))
+      console.log(
+        chalk.gray('  consolechain list-chains 137  # Search by chain ID'),
+      )
       console.log()
 
       print.info(chalk.cyan('🚀 Connect to a chain:\n'))
-      console.log(chalk.gray('  consolechain <address> --chain ethereum --standard 20'))
-      console.log(chalk.gray('  consolechain <address> --interactive --standard 721'))
+      console.log(
+        chalk.gray('  consolechain <address> --chain ethereum --standard 20'),
+      )
+      console.log(
+        chalk.gray('  consolechain <address> --interactive --standard 721'),
+      )
       console.log()
-
     } catch (error: any) {
       print.error(chalk.red(`\n❌ Error: ${error.message}\n`))
 

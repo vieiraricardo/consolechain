@@ -8,7 +8,7 @@ import { ParamType } from 'ethers'
  */
 export function parseAbiFunctionParams(
   functionName: string,
-  inputs: readonly ParamType[]
+  inputs: readonly ParamType[],
 ): string {
   const params = inputs
     .map((input) => `${input.name || '_'}: ${input.type}`)
