@@ -5,14 +5,19 @@ import {
   formatUpdateNotice,
   readCache,
   writeCache,
+  fetchLatestVersion,
+  checkForUpdate,
 } from '../src/lib/updateChecker'
 import { tmpdir } from 'os'
 import { resolve } from 'path'
-import { readFileSync, writeFileSync, mkdirSync } from 'fs'
+import { writeFileSync } from 'fs'
 
 let tmpCounter = 0
 const tmpCache = () =>
-  resolve(tmpdir(), `cc-update-${process.pid}-${Date.now()}-${tmpCounter++}.json`)
+  resolve(
+    tmpdir(),
+    `cc-update-${process.pid}-${Date.now()}-${tmpCounter++}.json`,
+  )
 
 describe('semverGreaterThan', () => {
   it('returns true when first arg is newer', () => {
@@ -46,11 +51,15 @@ describe('isUpdateAvailable', () => {
 
 describe('isCacheFresh', () => {
   it('is true when within the interval', () => {
-    expect(isCacheFresh({ lastCheck: 999, latestVersion: '0.2.3' }, 1000, 2000)).toBe(true)
+    expect(
+      isCacheFresh({ lastCheck: 999, latestVersion: '0.2.3' }, 1000, 2000),
+    ).toBe(true)
   })
 
   it('is false when stale', () => {
-    expect(isCacheFresh({ lastCheck: 0, latestVersion: '0.2.3' }, 3000, 2000)).toBe(false)
+    expect(
+      isCacheFresh({ lastCheck: 0, latestVersion: '0.2.3' }, 3000, 2000),
+    ).toBe(false)
   })
 
   it('is false when cache is null', () => {
@@ -84,12 +93,16 @@ describe('readCache / writeCache', () => {
   })
 
   it('writeCache does not throw when the directory is missing', () => {
-    const path = resolve(tmpdir(), `no-such-dir-${process.pid}-${Date.now()}`, 'cache.json')
-    expect(() => writeCache(path, { lastCheck: 1, latestVersion: '0.2.3' })).not.toThrow()
+    const path = resolve(
+      tmpdir(),
+      `no-such-dir-${process.pid}-${Date.now()}`,
+      'cache.json',
+    )
+    expect(() =>
+      writeCache(path, { lastCheck: 1, latestVersion: '0.2.3' }),
+    ).not.toThrow()
   })
 })
-
-import { fetchLatestVersion } from '../src/lib/updateChecker'
 
 const ok = (body: unknown) => ({ ok: true, json: async () => body })
 
@@ -122,13 +135,13 @@ describe('fetchLatestVersion', () => {
     // this promise would never settle and jest would time out.
     const fetchImpl = (_input: any, init?: RequestInit) =>
       new Promise<any>((_, reject) => {
-        init?.signal?.addEventListener('abort', () => reject(new Error('aborted')))
+        init?.signal?.addEventListener('abort', () =>
+          reject(new Error('aborted')),
+        )
       })
     expect(await fetchLatestVersion('https://x', 20, fetchImpl)).toBeNull()
   }, 2000)
 })
-
-import { checkForUpdate } from '../src/lib/updateChecker'
 
 describe('checkForUpdate', () => {
   it('notifies and writes cache when a newer version is published', async () => {
