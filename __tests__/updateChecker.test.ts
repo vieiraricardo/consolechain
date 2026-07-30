@@ -115,9 +115,13 @@ describe('fetchLatestVersion', () => {
   })
 
   it('returns null when the request times out (abort)', async () => {
-    const fetchImpl = async () => {
-      throw new Error('Aborted')
-    }
-    expect(await fetchLatestVersion('https://x', 10, fetchImpl)).toBeNull()
+    // Signal-aware fake fetch: hangs until the abort signal fires (like real fetch),
+    // so the AbortController timeout is genuinely exercised. If abort never fired,
+    // this promise would never settle and jest would time out.
+    const fetchImpl = (_input: any, init?: RequestInit) =>
+      new Promise<any>((_, reject) => {
+        init?.signal?.addEventListener('abort', () => reject(new Error('aborted')))
+      })
+    expect(await fetchLatestVersion('https://x', 20, fetchImpl)).toBeNull()
   }, 2000)
 })
