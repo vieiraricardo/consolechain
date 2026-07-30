@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-07-30
+
+### ✨ Added
+
+- **Update notifications** - The CLI now checks npm for a newer version on startup and prints a one-line, non-blocking notice (throttled to once per 24h, like the npm CLI)
+
+### 🐛 Fixed
+
+- **`list-chains` with numeric chain IDs** - Searching by chain ID (e.g. `list-chains 137`) no longer crashes with `query.toLowerCase is not a function`
+- **ABI loading** - Replaced dynamic `require()` with `readFileSync` + `JSON.parse`
+
+### 🔧 Changed
+
+- Bumped dependencies: axios, gluegun, ws, ethers
+- Resolved all ESLint errors (prettier formatting, removed dynamic require)
+- Removed redundant `yarn.lock` (project is npm-based)
+
+### 📚 Docs
+
+- Added npm and license badges to README
+
 ## [0.2.0] - 2025-10-08
 
 ### 🎉 Major Changes
